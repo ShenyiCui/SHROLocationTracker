@@ -1,0 +1,241 @@
+<br><br><br>
+<div class="mainpageContainer center">
+    <strong><em><p align="center" style="font-size: 25px;">{{unitName}}</p></em></strong>
+    <div style="text-align: center;" class="font14">
+        <p><strong>I'm </strong><em><label id="yourname">{{name}}</label></p>
+
+        <strong><p id="errorMsg" style="color:red; font-size: 12px;"></p></strong>
+        <br>
+        <form action="/request/outing/submit" method="post">
+            <center>
+                <div class="inputContainer">
+                    <p class="label">Home Address<br>(Complete this with Google Auto-Complete)</p>
+                    <input id="startAddress" name="startAddress">
+                </div>
+                <div class="inputContainer">
+                    <p class="label">Destination Address<br>(Complete this with Google Auto-Complete)</p>
+                    <input id="endAddress" name="endAddress">
+                </div>
+                <div class="inputContainer">
+                    <p class="label">Outside Activity</p>
+                    <input id="outsideActivity" name="outsideActivity">
+                </div>
+                <br><br><br>
+                <div class="inputContainer">
+                    <p class="label">Start Date<br>(Format: DDMMYYYY e.g 25072021)</p>
+                    <input id="startDate" name="startDate">
+                </div>
+                <div class="inputContainer">
+                    <p class="label">Start Time<br>(Format: HHMM e.g 0900)</p>
+                    <input type="number" id="startTime" name="startTime">
+                </div>
+                <br><br><br>
+                <div class="inputContainer">
+                    <p class="label">Projected End Date<br>(Format: DDMMYYYY e.g 25072021)</p>
+                    <input id="endDate" name="endDate">
+                </div>
+                <div class="inputContainer">
+                    <p class="label">Projected End Time<br>(Format: HHMM e.g 2359)</p>
+                    <input type="number" id="endTime" name="endTime">
+                </div>
+            </center>
+            <input style="display: none;" id="startAddressName" name="startAddressName">
+            <input style="display: none;" id="startAddressGoogle" name="startAddressGoogle">
+            <input style="display: none;" id="startAddressLat" name="startAddressLat">
+            <input style="display: none;" id="startAddressLong" name="startAddressLong">
+
+            <input style="display: none;" id="endAddressName" name="endAddressName">
+            <input style="display: none;" id="endAddressGoogle" name="endAddressGoogle">
+            <input style="display: none;" id="endAddressLat" name="endAddressLat">
+            <input style="display: none;" id="endAddressLong" name="endAddressLong">
+
+            <input style="display: none;" id="telegramID" name="telegramID">
+            <br>
+            <div style="text-align: center;" class="font14">
+                <button id="next" type="submit" class="blackbuttonOutline">Submit</button>
+            </div>
+        </form>
+
+    </div>
+    <br><br>
+</div>
+<br><br><br><br>
+<script>
+
+    $( function() {
+        $( "#startDate" ).datepicker({
+            dateFormat: "ddmmyy"
+        });
+        $( "#endDate" ).datepicker({
+            dateFormat: "ddmmyy"
+        });
+        $("#startDate").val(moment(new Date()).format("DDMMYYYY"))
+        $("#endDate").val(moment(new Date()).add(2,'hours').format("DDMMYYYY"))
+
+        $("#startTime").val(moment(new Date()).format("HHmm"))
+        $("#endTime").val(moment(new Date()).add(2,'hours').format("HHmm"))
+
+        $("#telegramID").val("{{telegramID}}")
+    });
+
+    window.setInterval(function(){
+        //console.log(myaddresses + " " + $("#myoutsideactivity").val().length + " " + $("#starttime").val().length + " " + $("#endtime").val().length)
+        if($("#startAddress").val().length == 0 || $("#endAddress").val().length == 0 || $("#startAddressName").val().length===0 || $("#startAddressLat").val().length===0 || $("#startAddressLong").val().length===0 || $("#endAddressName").val().length===0 || $("#endAddressLat").val().length===0 || $("#endAddressLong").val().length===0){
+            $("#next").prop('disabled', true);
+            $("#next").html("Please fill all fields with the correct information and format");
+            $("#errorMsg").html("*PLEASE USE <em>MAPS AUTO-COMPLETE</em> FOR YOUR ADDRESSES*")
+        }
+        else if(isNumeric($("#startAddressName").val()) ||  isNumeric($("#endAddressName").val())){
+            $("#next").prop('disabled', true);
+            $("#next").html("Please fill all fields with the correct information and format");
+            $("#errorMsg").html("*PLEASE DO NOT <em>ENTER POSTAL CODES</em> FOR YOUR ADDRESSES*")
+        }
+        else if($("#outsideActivity").val().length == 0 || forbiddenChars($("#outsideActivity").val())){
+            $("#next").prop('disabled', true);
+            $("#next").html("Please fill all fields with the correct information and format");
+            $("#errorMsg").html("*PLEASE FILL OUT YOUR OUTSIDE ACTIVITY*<br>DO NOT INCLUDE FORBIDDEN CHARS: !@#$%^&*()_+-=[]{};:\|,.<>/?")
+        }
+        else if(!isNumeric($("#endTime").val()) || !isNumeric($("#startTime").val()) || !isNumeric($("#startDate").val()) || !isNumeric($("#endDate").val()) || $("#endDate").val().length != 8||$("#startDate").val().length != 8||$("#startTime").val().length != 4 || parseInt($("#startTime").val()) < 0 || parseInt($("#startTime").val()) > 2359 || $("#endTime").val().length != 4 || parseInt($("#endTime").val()) < 0 || parseInt($("#endTime").val()) > 2359  || (parseInt($("#endDate").val()) + parseInt($("#endTime").val())) < (parseInt($("#startDate").val()) + parseInt($("#startTime").val())) ){
+            $("#next").prop('disabled', true);
+            $("#next").html("Please fill all fields with the correct information and format");
+            $("#errorMsg").html("*ENSURE <em>you have a 4 digit number</em> THAT'S <em>greater than 0000 and less than 2359</em> AND <em>your start time must be smaller than your end time</em>*<br>*Your Date Values cannot be empty either*")
+        }
+        else {
+            $("#next").prop('disabled', false);
+            $("#next").html("Submit");
+            $("#errorMsg").html("")
+        }
+    },1000);
+
+    function addressAutoComplete()
+    {
+
+        var startAdd = document.getElementById('startAddress');
+        var endAdd = document.getElementById('endAddress');
+
+        var autocompleteStartAddress = new google.maps.places.Autocomplete(startAdd);
+        var autocompleteEndAddress = new google.maps.places.Autocomplete(endAdd);
+
+        // Set the data fields to return when the user selects a place.
+        autocompleteStartAddress.setFields(['address_components', 'geometry', 'icon', 'name']);
+        autocompleteEndAddress.setFields(['address_components', 'geometry', 'icon', 'name']);
+
+        var infowindow = new google.maps.InfoWindow();
+
+        autocompleteStartAddress.addListener('place_changed', function() {
+            infowindow.close();
+            //marker.setVisible(false);
+            var place = autocompleteStartAddress.getPlace();
+            console.log(place)
+
+            if (!place.geometry)
+            {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                window.alert("No details available for input: '" + place.name + "'");
+                return;
+            }
+
+            var address = '';
+            if (place.address_components) {
+                address = [
+                    (place.address_components[0] && place.address_components[0].short_name || ''),
+                    (place.address_components[1] && place.address_components[1].short_name || ''),
+                    (place.address_components[2] && place.address_components[2].short_name || '')
+                ].join(' ');
+            }
+
+            var coordinateKeys = [];
+            for(var k in place.geometry.viewport) coordinateKeys.push(k);
+            //console.log(coordinateKeys)
+
+            var LatKeys = [];
+            for(var k in place.geometry.viewport[coordinateKeys[0]]) LatKeys.push(k);
+            //console.log(LatKeys)
+
+            var LngKeys = [];
+            for(var k in place.geometry.viewport[coordinateKeys[0]]) LngKeys.push(k);
+            //console.log(LngKeys)
+
+            $("#startAddressName").val(place.name);
+            $("#startAddressGoogle").val(address);
+            $("#startAddressLat").val(place.geometry.viewport[coordinateKeys[0]][LatKeys[0]]);
+            $("#startAddressLong").val(place.geometry.viewport[coordinateKeys[1]][LngKeys[0]]);
+
+            console.log(address)
+            console.log({
+                name: $("#startAddressName").val(),
+                address: $("#startAddressGoogle").val(),
+                lat: $("#startAddressLat").val(),
+                long: $("#startAddressLong").val()
+            })
+        });
+        autocompleteEndAddress.addListener('place_changed', function() {
+            infowindow.close();
+            //marker.setVisible(false);
+            var place = autocompleteEndAddress.getPlace();
+            console.log(place)
+
+            if (!place.geometry)
+            {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                window.alert("No details available for input: '" + place.name + "'");
+                return;
+            }
+
+            var address = '';
+            if (place.address_components) {
+                address = [
+                    (place.address_components[0] && place.address_components[0].short_name || ''),
+                    (place.address_components[1] && place.address_components[1].short_name || ''),
+                    (place.address_components[2] && place.address_components[2].short_name || '')
+                ].join(' ');
+            }
+
+            var coordinateKeys = [];
+            for(var k in place.geometry.viewport) coordinateKeys.push(k);
+            //console.log(coordinateKeys)
+
+            var LatKeys = [];
+            for(var k in place.geometry.viewport[coordinateKeys[0]]) LatKeys.push(k);
+            //console.log(LatKeys)
+
+            var LngKeys = [];
+            for(var k in place.geometry.viewport[coordinateKeys[0]]) LngKeys.push(k);
+            //console.log(LngKeys)
+
+            $("#endAddressName").val(place.name);
+            $("#endAddressGoogle").val(address);
+            $("#endAddressLat").val(place.geometry.viewport[coordinateKeys[0]][LatKeys[0]]);
+            $("#endAddressLong").val(place.geometry.viewport[coordinateKeys[1]][LngKeys[0]]);
+
+            console.log(address)
+            console.log({
+                name: $("#endAddressName").val(),
+                address: $("#endAddressGoogle").val(),
+                lat: $("#endAddressLat").val(),
+                long: $("#endAddressLong").val()
+            })
+        });
+
+
+    }
+
+    function isNumeric(str) {
+        if (typeof str != "string") return false // we only process strings!
+        return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+                !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+    }
+
+    function forbiddenChars(string){
+        var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+
+        if(format.test(string)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=xxxx&libraries=places&callback=addressAutoComplete" async defer></script>

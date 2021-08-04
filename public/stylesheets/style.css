@@ -1,0 +1,100 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: rgb(40, 83, 107);
+}
+
+a {
+  color: #00B7FF;
+}
+
+.mainpageContainer {
+  background-color: rgb(235, 245, 238);
+  padding:15px;
+  width:70%;
+  border-radius: 25px;
+}
+
+.center
+{
+  margin: auto;
+}
+
+input{
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 3px solid #ccc;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+  outline: none;
+}
+
+input:focus {
+  border: 3px solid #555;
+}
+
+.blackbuttonOutline
+{
+  background-color: rgb(235, 245, 238);
+  color: black;
+  border: 2px solid #555555;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 25px;
+  width: 80%;
+}
+
+.blackbuttonOutline:hover {
+  background-color: #555555;
+  color: white;
+}
+
+.imgBtn
+{
+  cursor: pointer;
+}
+
+/*CSS Search feture in the Settings Page*/
+.listOfItemsButtons
+{
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.listOfItemsButtons li a
+{
+  border: 1px solid #ddd;
+  margin-top: -1px; /* Prevent double borders */
+  background-color: rgb(255,255,255);
+  padding: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  color: black;
+  display: block
+}
+.listOfItemsButtons li a:hover:not(.header)
+{
+  background-color: #eee;
+}
+
+.font14
+{
+  font-size: 14px;
+}
+.label
+{
+  margin-top: 0;
+  margin-bottom: 0;
+  text-align: left;
+}
+.inputContainer
+{
+  width: 80%;
+}

@@ -1,0 +1,20 @@
+<br><br><br>
+<div class="mainpageContainer center">
+    <strong><em><p align="center" style="font-size: 25px;">Decline Request</p></em></strong>
+
+    <form action="/decline/outing" method="post">
+        <div style="text-align: center;">
+            <input style="width: 80%;" value="No Specified Reason" placeholder="Reason for denial:" name="reason" id="reason">
+        </div>
+        <input style="display: none" id = "tripID" name = "tripID">
+        <input style="display: none" id = "telegramID" name = "telegramID">
+        <div style="text-align: center;" class="font14">
+            <button id="next" type="submit" class="blackbuttonOutline">Decline</button>
+        </div>
+        <br>
+    </form>
+</div>
+<script>
+    $("#tripID").val("{{tripID}}")
+    $("#telegramID").val("{{telegramID}}")
+</script>
